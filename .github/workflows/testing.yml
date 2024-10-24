@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - id: podman-install
+      - id: setup-podman
         name: Set up podman
         run: |
           source /etc/os-release
@@ -24,15 +24,18 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install podman
 
-      - id: oc-install
-        name: Set up oc client
-        run: |
-          wget https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          sudo tar xzvf oc.tar.gz -C /usr/local/bin
+#      - id: setup-oc
+#        name: Set up oc client
+#        run: |
+#          wget https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+#          sudo tar xzvf oc.tar.gz -C /usr/local/bin
+
+      - id: setup-kubectl
+        name: Set up Kubectl
+        uses: azure/setup-kubectl@v4
 
       - id: run-microshift-cluster
         name: Run a microshift cluster
-        if: steps.list-changed.outputs.changed == 'true'
         run: |
           sudo podman run -d --rm --name microshift \
                --privileged -v microshift-data:/var/lib -p 6443:6443 \
