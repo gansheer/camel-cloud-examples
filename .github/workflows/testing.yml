@@ -61,3 +61,4 @@ jobs:
         name: Check that the cluster is up
         run: |
           kubectl get all -A
+          kubectl api-resources
