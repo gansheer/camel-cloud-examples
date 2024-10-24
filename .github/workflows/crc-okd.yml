@@ -63,5 +63,6 @@ jobs:
       - id: cluster-check
         name: Check that the cluster is up
         run: |
+          oc login -u developer https://api.crc.testing:6443
           oc get all -A
           oc api-resources
