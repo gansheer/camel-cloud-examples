@@ -59,6 +59,11 @@ runs:
       jbang camel@apache/camel --version
       jbang app install camel@apache/camel
 
+  - id: setup-camel-kubernetes
+    name: Setup Camel Kubernetes plugin
+    shell: bash
+    run: |
+      camel plugin add kubernetes
 
   - id: check-setup
     name: Check setup
@@ -66,3 +71,4 @@ runs:
     run: |
       citrus --version
       camel --version
+      camel plugin

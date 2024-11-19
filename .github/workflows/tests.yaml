@@ -38,6 +38,7 @@ jobs:
       uses: ./.github/actions/infra-minikube
 
     - name: Run Tests
+      shell: bash
       run: |
         echo "Running package"
-        make clean package
+        make clean k8s-package CAMEL_CMD=camel
