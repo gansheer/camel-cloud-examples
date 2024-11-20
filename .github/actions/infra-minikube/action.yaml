@@ -30,9 +30,10 @@ runs:
     name: Start minikube
     uses: medyagh/setup-minikube@v0.0.18
     with:
-      addons: registry
+      addons: registry,registry-aliases,ingress
       cpus: max
       memory: max
+      insecure-registry: 'localhost:5000,10.0.0.0/24'
   - id: minikube-settings
     name: Set docker-env
     shell: bash
@@ -40,3 +41,4 @@ runs:
       eval $(minikube -p minikube docker-env)
       echo "INSTALL_REGISTRY=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')" >> $GITHUB_ENV
       echo "Setting registry as $INSTALL_REGISTRY which is required by certain tests"
+      docker images

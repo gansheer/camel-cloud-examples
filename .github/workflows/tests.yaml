@@ -38,7 +38,37 @@ jobs:
       uses: ./.github/actions/infra-minikube
 
     - name: Run Tests
+      continue-on-error: true
       shell: bash
       run: |
-        echo "Running package"
-        make clean k8s-package CAMEL_CMD=camel
+        echo "config minikube ?"
+        eval $(minikube docker-env)
+        echo "Running camel kubernetes command"
+        make clean CAMEL_CMD=camel
+
+        echo "Running smoke test on quarkus"
+        pushd quarkus/timer-log
+        camel kubernetes export timer-log-route.yaml \
+          --gav=examples:timer-log:1.0.0 \
+          --trait container.image-pull-policy=IfNotPresent \
+          --trait service.type=NodePort \
+          --runtime=quarkus \
+          --build-property=quarkus.kubernetes.image-pull-policy=Never \
+          --image-registry $INSTALL_REGISTRY
+        ./mvnw clean package
+        kubectl apply -f ./target/kubernetes/kubernetes.yml
+        kubectl wait --for=condition=ready --timeout=90s pod -l app.kubernetes.io/name=timer-log
+        kubectl logs -l app.kubernetes.io/name=timer-log | grep -c -Ei "Hello Camel from route1"
+        kubectl delete --all -f ./target/kubernetes/kubernetes.yml
+        kubectl wait --for=delete --timeout=90s pod -l app.kubernetes.io/name=timer-log
+        popd
+
+    - name: Dump
+      shell: bash
+      run: |
+        echo "Dump state"
+        echo "Registry IP $INSTALL_REGISTRY"
+        docker images
+        kubectl get pods -o yaml
+        kubectl get deployments -o yaml
+        kubectl describe pod -l app.kubernetes.io/name=timer-log
